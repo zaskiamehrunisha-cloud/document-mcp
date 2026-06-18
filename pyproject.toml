@@ -1,0 +1,129 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "docintel"
+version = "0.1.0"
+description = "Engineering Document Intelligence MCP Server - Governance gateway and RAG knowledge engine for controlled engineering drawings"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.14"
+authors = [
+    {name = "Blitzy Platform", email = "platform@blitzy.com"},
+]
+keywords = ["mcp", "document-intelligence", "engineering", "ocr", "rag"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    # Core framework
+    "fastapi>=0.111.0",
+    "uvicorn[standard]>=0.30.0",
+    "pydantic>=2.7.0",
+    "pydantic-settings>=2.2.0",
+    
+    # MCP
+    "mcp>=1.0.0",
+    
+    # Database
+    "sqlalchemy[asyncio]>=2.0.30",
+    "psycopg[binary,pool]>=3.2.0",
+    "alembic>=1.13.0",
+    "pgvector>=0.3.0",
+    
+    # OCR and extraction
+    "paddleocr>=2.7.0",
+    "pytesseract>=0.3.10",
+    "Pillow>=10.3.0",
+    "pymupdf>=1.24.0",
+    "pymupdf4llm>=0.0.17",
+    "ezdxf>=1.1.0",
+    "python-docx>=1.1.0",
+    "openpyxl>=3.1.2",
+    "python-pptx>=0.6.23",
+    
+    # LLM and embeddings
+    "langchain>=0.2.0",
+    "langchain-community>=0.2.0",
+    "sentence-transformers>=3.0.0",
+    
+    # Utilities
+    "python-multipart>=0.0.9",
+    "aiofiles>=24.1.0",
+    "httpx>=0.27.0",
+    "pyyaml>=6.0.1",
+    "python-dotenv>=1.0.1",
+    "tenacity>=9.0.0",
+    "rich>=13.7.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.2.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.5.0",
+    "mypy>=1.10.0",
+    "types-psycopg2",
+    "types-PyYAML",
+]
+test = [
+    "pytest>=8.2.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=5.0.0",
+    "httpx>=0.27.0",
+]
+
+[project.scripts]
+docintel = "docintel.main:run"
+seed-reference = "scripts.seed_reference_docs:main"
+
+[project.urls]
+Homepage = "https://github.com/blitzy/docintel"
+Documentation = "https://github.com/blitzy/docintel#readme"
+Repository = "https://github.com/blitzy/docintel.git"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"docintel" = ["py.typed"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py314"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+warn_return_any = true
+warn_unused_ignores = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+
+[tool.coverage.run]
+source = ["src/docintel"]
+omit = ["*/tests/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+]

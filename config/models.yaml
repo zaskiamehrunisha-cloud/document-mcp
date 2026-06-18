@@ -1,0 +1,130 @@
+# =============================================================================
+# DOCINTEL - Model Configuration
+# Local LLM and embedding model settings
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# LLM Configuration (Ollama / vLLM - OpenAI-compatible)
+# -----------------------------------------------------------------------------
+llm:
+  # Model identifiers (as served by Ollama/vLLM)
+  primary_model: "llama3.2:3b-instruct-q4_K_M"
+  fallback_model: "qwen2.5:3b-instruct-q4_K_M"
+  
+  # Inference parameters
+  temperature: 0.1
+  max_tokens: 4096
+  top_p: 0.9
+  frequency_penalty: 0.0
+  presence_penalty: 0.0
+  
+  # Request timeouts (seconds)
+  timeout: 120
+  connect_timeout: 10
+  
+  # Retry configuration
+  max_retries: 3
+  retry_delay: 1.0
+
+# -----------------------------------------------------------------------------
+# Embedding Model Configuration (sentence-transformers / BGE)
+# -----------------------------------------------------------------------------
+embeddings:
+  # Model name (HuggingFace model identifier)
+  model_name: "BAAI/bge-large-en-v1.5"
+  
+  # Output dimension (must match VECTOR(n) in database schema)
+  dimension: 1024
+  
+  # Device: "cpu", "cuda", "mps" (Apple Silicon)
+  device: "cpu"
+  
+  # Normalize embeddings (recommended for cosine similarity)
+  normalize_embeddings: true
+  
+  # Batch size for embedding generation
+  batch_size: 32
+  
+  # Max sequence length (model-specific)
+  max_seq_length: 512
+
+# -----------------------------------------------------------------------------
+# Model Server Endpoints
+# -----------------------------------------------------------------------------
+servers:
+  # Ollama default endpoint
+  ollama:
+    base_url: "http://localhost:11434/v1"
+    api_key: "ollama"  # Ollama accepts any key
+    
+  # vLLM endpoint (production)
+  vllm:
+    base_url: "http://localhost:8000/v1"
+    api_key: "vllm"  # Configure real key in production
+    
+  # Default active server
+  active: "ollama"
+
+# -----------------------------------------------------------------------------
+# Prompt Templates
+# -----------------------------------------------------------------------------
+prompts:
+  # Extraction prompt for structured record parsing
+  extraction: |
+    You are an engineering document parser. Extract structured information from the provided text.
+    Return a JSON object with the following fields. Use null for missing fields.
+    
+    Fields to extract:
+    - document_number: string (format: XXX-X-XX-XX-XXX)
+    - title: string
+    - revision: string (single character or code like ASB, IFI)
+    - contract_number: string
+    - issue_status: string (IFR, IFA, IFC, ASB, IFI, or similar)
+    - client: string
+    - project_title: string
+    - location: string
+    - drawing_type: string
+    - discipline: string (single letter code)
+    - page: string (e.g., "Page 1 of 5")
+    - sheet_count: integer
+    - description: string (revision description if present)
+    - comments: array of objects with comment_ref, comment_text, response_text, status
+    - revision_history: array of objects with revision, date, description
+    - legend_entries: array of objects with symbol, description
+    - drawing_index: array of objects with drawing_number, drawing_title, revision, sheet_count
+    - equipment_ratings: array of objects with equipment_tag, parameter, value, unit
+    
+    Text to parse:
+    {text}
+    
+    Return only valid JSON, no markdown formatting.
+  
+  # QA prompt for grounded question answering
+  qa: |
+    You are an engineering document assistant. Answer the user's question using ONLY the provided context.
+    If the answer is not in the context, say "I cannot find that information in the provided documents."
+    
+    Context:
+    {context}
+    
+    Question: {question}
+    
+    Provide a concise answer. At the end, include citations in the format:
+    [Source: DOCUMENT_NUMBER, Page/Sheet X]
+    
+    Answer:
+  
+  # Validation prompt for rule checking
+  validation: |
+    You are a document control validator. Review the structured record against the provided rules.
+    Return a JSON object with:
+    - conforms: boolean
+    - violations: array of objects with rule_id, rule_description, severity (error/warning/info), and details
+    
+    Rules:
+    {rules}
+    
+    Structured Record:
+    {record}
+    
+    Return only valid JSON, no markdown formatting.

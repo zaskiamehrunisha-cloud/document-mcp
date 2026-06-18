@@ -1,0 +1,81 @@
+# Docker Compose configuration for DOCINTEL
+# Orchestrates the on-premise stack: PostgreSQL/pgvector, Ollama, and the application
+
+services:
+  # PostgreSQL with pgvector extension
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: docintel-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-docintel}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-docintel}
+      POSTGRES_DB: ${POSTGRES_DB:-docintel}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-docintel}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - docintel-network
+
+  # Ollama for local LLM inference
+  ollama:
+    image: ollama/ollama:latest
+    container_name: docintel-ollama
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - docintel-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # DOCINTEL application
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: docintel-app
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-docintel}:${POSTGRES_PASSWORD:-docintel}@postgres:5432/${POSTGRES_DB:-docintel}
+      - OLLAMA_BASE_URL=http://ollama:11434/v1
+      - REFERENCE_DOCS_DIR=/app/data/reference
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    networks:
+      - docintel-network
+    command: uvicorn docintel.main:app --host 0.0.0.0 --port 8000
+
+volumes:
+  postgres_data:
+    driver: local
+  ollama_data:
+    driver: local
+
+networks:
+  docintel-network:
+    driver: bridge

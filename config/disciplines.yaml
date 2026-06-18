@@ -1,0 +1,118 @@
+# =============================================================================
+# DOCINTEL - Disciplines Configuration
+# Engineering discipline teams and their metadata
+# =============================================================================
+
+disciplines:
+  - code: "E"
+    name: "Electrical"
+    mcp_alias: "ELC"
+    description: "Electrical engineering drawings and documents"
+    drawing_types:
+      - "IN"  # Index
+      - "LO"  # Layout
+      - "SL"  # Single Line Diagram
+      - "ML"  # Multi-line
+      - "SC"  # Single Line Cable
+      - "WD"  # Wiring Diagram
+      - "EL"  # Equipment Layout
+      - "GP"  # General Arrangement
+      
+  - code: "M"
+    name: "Mechanical"
+    mcp_alias: "MEC"
+    description: "Mechanical engineering drawings and documents"
+    drawing_types:
+      - "IN"  # Index
+      - "GP"  # General Arrangement
+      - "PD"  # Piping Detail
+      - "IS"  # Isometric
+      - "EL"  # Equipment Layout
+      
+  - code: "I"
+    name: "Instrumentation"
+    mcp_alias: "INS"
+    description: "Instrumentation and control drawings"
+    drawing_types:
+      - "IN"  # Index
+      - "SL"  # Single Line Diagram
+      - "WD"  # Wiring Diagram
+      - "GP"  # General Arrangement
+      
+  - code: "S"
+    name: "Simulation"
+    mcp_alias: "SIM"
+    description: "Simulation and modeling documents"
+    drawing_types:
+      - "IN"  # Index
+      - "GP"  # General Arrangement
+      
+  - code: "C"
+    name: "Civil"
+    mcp_alias: "CIV"
+    description: "Civil and structural drawings"
+    drawing_types:
+      - "IN"  # Index
+      - "GP"  # General Arrangement
+      - "CD"  # Civil Detail
+      - "ST"  # Structural
+      
+  - code: "P"
+    name: "Piping"
+    mcp_alias: "PIP"
+    description: "Piping engineering drawings"
+    drawing_types:
+      - "IN"  # Index
+      - "GP"  # General Arrangement
+      - "PD"  # Piping Detail
+      - "IS"  # Isometric
+      
+  - code: "ST"
+    name: "Structural"
+    mcp_alias: "STR"
+    description: "Structural engineering drawings"
+    drawing_types:
+      - "IN"  # Index
+      - "GP"  # General Arrangement
+      - "CD"  # Civil Detail
+      - "ST"  # Structural
+
+# -----------------------------------------------------------------------------
+# Access Control Configuration
+# -----------------------------------------------------------------------------
+access_control:
+  # Whether discipline-based access control is enforced
+  enforce_discipline_access: false  # Enable in production with proper auth
+  
+  # Disciplines that can validate documents (typically leads/checkers)
+  validators:
+    - "E"
+    - "M"
+    - "I"
+    - "S"
+    - "C"
+    - "P"
+    - "ST"
+  
+  # Disciplines that can submit to DOCON
+  submitters:
+    - "E"
+    - "M"
+    - "I"
+    - "S"
+    - "C"
+    - "P"
+    - "ST"
+
+# -----------------------------------------------------------------------------
+# Default Settings
+# -----------------------------------------------------------------------------
+defaults:
+  # Default discipline for unclassified documents
+  default_discipline: "E"
+  
+  # Default drawing type
+  default_drawing_type: "GP"
+  
+  # Whether to require mandatory administrative sheets
+  require_mandatory_sheets: true

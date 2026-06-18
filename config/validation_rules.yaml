@@ -1,0 +1,144 @@
+# =============================================================================
+# DOCINTEL - Validation Rules Configuration
+# Derived from reference documents and project standards
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Document Number Grammar
+# Pattern: ^[A-Z]{3}-[A-Z]-[A-Z]{2}-\d{2}-\d{3}$
+# Example: ARG-E-LO-00-006
+#   ARG = Project code (3 letters)
+#   E   = Discipline (1 letter)
+#   LO  = Drawing type (2 letters)
+#   00  = Area code (2 digits)
+#   006 = Sequence (3 digits)
+# -----------------------------------------------------------------------------
+document_number:
+  regex: "^[A-Z]{3}-[A-Z]-[A-Z]{2}-\\d{2}-\\d{3}$"
+  description: "Project code (3) - Discipline (1) - Drawing type (2) - Area (2) - Sequence (3)"
+  examples:
+    - "ARN-E-IN-00-001"
+    - "ARG-E-LO-00-006"
+    - "ARG-E-LO-00-007"
+
+# -----------------------------------------------------------------------------
+# Contract Number
+# -----------------------------------------------------------------------------
+contract_number: "3500003752"
+
+# -----------------------------------------------------------------------------
+# Title Block Required Fields
+# These fields must be present in every controlled drawing
+# -----------------------------------------------------------------------------
+title_block_required_fields:
+  - "DOCUMENT NO."
+  - "CONTRACTOR DOC NO."
+  - "REV."
+  - "CONTRACT NO."
+  - "PAGE"
+  - "CLIENT"
+  - "PROJECT TITLE"
+  - "DOC. TITLE"
+
+# -----------------------------------------------------------------------------
+# Revision / Issue Status Ladder
+# Ordered from earliest to latest
+# -----------------------------------------------------------------------------
+revision_ladder:
+  - code: "A"
+    description: "Issued for Review"
+    short: "IFR"
+  - code: "B"
+    description: "Issued for Approval"
+    short: "IFA"
+  - code: "0"
+    description: "Issued for Construction"
+    short: "IFC"
+  - code: "1"
+    description: "Re-Issued for Construction"
+    short: "Re-IFC"
+  - code: "ASB"
+    description: "As-Built"
+    short: "ASB"
+  - code: "IFI"
+    description: "Issued for Information"
+    short: "IFI"
+
+# -----------------------------------------------------------------------------
+# Mandatory Administrative Sheets
+# These sheets must be present in every controlled submission
+# -----------------------------------------------------------------------------
+mandatory_sheets:
+  - "COMMENTS RESPONSE SHEET"
+  - "RECORD OF REVISION"
+
+# -----------------------------------------------------------------------------
+# Discipline Codes
+# -----------------------------------------------------------------------------
+disciplines:
+  - code: "E"
+    name: "Electrical"
+    mcp_alias: "ELC"
+  - code: "M"
+    name: "Mechanical"
+    mcp_alias: "MEC"
+  - code: "I"
+    name: "Instrumentation"
+    mcp_alias: "INS"
+  - code: "S"
+    name: "Simulation"
+    mcp_alias: "SIM"
+  - code: "C"
+    name: "Civil"
+    mcp_alias: "CIV"
+  - code: "P"
+    name: "Piping"
+    mcp_alias: "PIP"
+  - code: "ST"
+    name: "Structural"
+    mcp_alias: "STR"
+
+# -----------------------------------------------------------------------------
+# Drawing Type Codes (2-letter)
+# -----------------------------------------------------------------------------
+drawing_types:
+  - code: "IN"
+    description: "Index / Schedule"
+  - code: "LO"
+    description: "Layout"
+  - code: "SL"
+    description: "Single Line Diagram"
+  - code: "ML"
+    description: "Multi-line / Schematic"
+  - code: "GP"
+    description: "General Arrangement"
+  - code: "CD"
+    description: "Civil Detail"
+  - code: "PD"
+    description: "Piping Detail"
+  - code: "IS"
+    description: "Isometric"
+  - code: "EL"
+    description: "Equipment Layout"
+  - code: "SC"
+    description: "Single Line Cable"
+  - code: "WD"
+    description: "Wiring Diagram"
+
+# -----------------------------------------------------------------------------
+# Validation Thresholds
+# -----------------------------------------------------------------------------
+thresholds:
+  confidence_minimum: 0.6
+  ocr_confidence_minimum: 0.7
+  title_block_match_threshold: 0.8
+
+# -----------------------------------------------------------------------------
+# Client / Project Metadata (from reference documents)
+# -----------------------------------------------------------------------------
+project:
+  client: "PT MEDCO E&P INDONESIA"
+  project_title: "ENGINEERING, PROCUREMENT & CONSTRUCTION FLOWLINE, TRUNKLINE, AND PIPELINE ARUNG NOWERA DEVELOPMENT"
+  location: "ARUNG NOWERA"
+  consortium: "KSO PT Menara Gading Putih – PT Gaspro Sentraco"
+  contractor: "PT MGP - Gaspro"

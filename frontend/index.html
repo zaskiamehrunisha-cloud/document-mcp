@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOCINTEL - Engineering Document Intelligence</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            opacity: 0.9;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: #ecf0f1;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            font-size: 1em;
+        }
+        
+        .tab.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input[type="text"],
+        input[type="file"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .result.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+        
+        .citation {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #3498db;
+        }
+        
+        .api-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        
+        .api-info code {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>DOCINTEL</h1>
+            <p>Engineering Document Intelligence - Governance Gateway & RAG Knowledge Engine</p>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('upload')">Upload Document</button>
+            <button class="tab" onclick="showTab('validate')">Validate Document</button>
+            <button class="tab" onclick="showTab('search')">Search Knowledge Base</button>
+            <button class="tab" onclick="showTab('submit')">Submit to DOCON</button>
+        </div>
+        
+        <!-- Upload Tab -->
+        <div id="upload" class="tab-content active">
+            <h2>Ingest Document</h2>
+            <div class="api-info">
+                <strong>MCP Tool:</strong> <code>ingest_document</code> | 
+                <strong>Endpoint:</strong> <code>POST /api/documents</code>
+            </div>
+            
+            <form id="ingestForm">
+                <div class="form-group">
+                    <label for="file">Document File (PDF, DWG, DXF, DOCX, XLSX, PPTX)</label>
+                    <input type="file" id="file" name="file" required accept=".pdf,.dwg,.dxf,.docx,.xlsx,.pptx">
+                </div>
+                
+                <div class="form-group">
+                    <label for="discipline">Discipline</label>
+                    <select id="discipline" name="discipline" required>
+                        <option value="">Select discipline...</option>
+                        <option value="ELC">ELC - Electrical</option>
+                        <option value="MEC">MEC - Mechanical</option>
+                        <option value="INS">INS - Instrumentation</option>
+                        <option value="SIM">SIM - Simulation</option>
+                        <option value="PIP">PIP - Piping</option>
+                        <option value="CIV">CIV - Civil</option>
+                        <option value="STR">STR - Structural</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="metadata">Metadata (JSON, optional)</label>
+                    <textarea id="metadata" name="metadata" placeholder='{"project": "ARUNG NOWERA", "notes": "..."}'></textarea>
+                </div>
+                
+                <button type="submit" id="ingestBtn">Ingest Document</button>
+            </form>
+            
+            <div id="ingestResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Validate Tab -->
+        <div id="validate" class="tab-content">
+            <h2>Validate Document</h2>
+            <div class="api-info">
+                <strong>MCP Tool:</strong> <code>validate_document</code>
+            </div>
+            
+            <form id="validateForm">
+                <div class="form-group">
+                    <label for="validateRecord">Structured Record (JSON)</label>
+                    <textarea id="validateRecord" name="validateRecord" rows="10" required placeholder='Paste structured record from ingestion...'></textarea>
+                </div>
+                
+                <button type="submit" id="validateBtn">Validate Document</button>
+            </form>
+            
+            <div id="validateResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Search Tab -->
+        <div id="search" class="tab-content">
+            <h2>Search Knowledge Base</h2>
+            <div class="api-info">
+                <strong>MCP Tool:</strong> <code>search_knowledge_base</code> | 
+                <strong>Endpoint:</strong> <code>POST /api/search</code>
+            </div>
+            
+            <form id="searchForm">
+                <div class="form-group">
+                    <label for="question">Engineering Question</label>
+                    <input type="text" id="question" name="question" required placeholder="e.g., What ground voltage rating is required?">
+                </div>
+                
+                <div class="form-group">
+                    <label for="searchDiscipline">Discipline (optional)</label>
+                    <select id="searchDiscipline" name="discipline">
+                        <option value="">All disciplines</option>
+                        <option value="ELC">ELC - Electrical</option>
+                        <option value="MEC">MEC - Mechanical</option>
+                        <option value="INS">INS - Instrumentation</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="topK">Number of Results</label>
+                    <input type="number" id="topK" name="top_k" value="5" min="1" max="20">
+                </div>
+                
+                <button type="submit" id="searchBtn">Search</button>
+            </form>
+            
+            <div id="searchResult" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- Submit Tab -->
+        <div id="submit" class="tab-content">
+            <h2>Submit to DOCON</h2>
+            <div class="api-info">
+                <strong>MCP Tool:</strong> <code>submit_to_docon</code>
+            </div>
+            
+            <form id="submitForm">
+                <div class="form-group">
+                    <label for="documentId">Document ID</label>
+                    <input type="text" id="documentId" name="document_id" required placeholder="Enter document ID from ingestion">
+                </div>
+                
+                <button type="submit" id="submitBtn">Submit to DOCON</button>
+            </form>
+            
+            <div id="submitResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = window.location.origin;
+        
+        function showTab(tabId) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        function showResult(elementId, content, type = 'info') {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = content;
+            resultDiv.style.display = 'block';
+        }
+        
+        function showLoading(elementId, buttonId, message = 'Processing...') {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.className = 'result info loading';
+            resultDiv.textContent = message;
+            resultDiv.style.display = 'block';
+            
+            const button = document.getElementById(buttonId);
+            button.disabled = true;
+            button.textContent = 'Processing...';
+        }
+        
+        function resetButton(buttonId, originalText) {
+            const button = document.getElementById(buttonId);
+            button.disabled = false;
+            button.textContent = originalText;
+        }
+        
+        // Ingest Document
+        document.getElementById('ingestForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            formData.append('file', document.getElementById('file').files[0]);
+            formData.append('discipline', document.getElementById('discipline').value);
+            
+            const metadata = document.getElementById('metadata').value;
+            if (metadata) {
+                formData.append('metadata', metadata);
+            }
+            
+            showLoading('ingestResult', 'ingestBtn', 'Ingesting document...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/documents`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult('ingestResult', JSON.stringify(result, null, 2), 'success');
+                } else {
+                    showResult('ingestResult', `Error: ${result.detail || JSON.stringify(result)}`, 'error');
+                }
+            } catch (error) {
+                showResult('ingestResult', `Error: ${error.message}`, 'error');
+            } finally {
+                resetButton('ingestBtn', 'Ingest Document');
+            }
+        });
+        
+        // Validate Document
+        document.getElementById('validateForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const recordText = document.getElementById('validateRecord').value;
+            let record;
+            
+            try {
+                record = JSON.parse(recordText);
+            } catch (error) {
+                showResult('validateResult', 'Invalid JSON format', 'error');
+                return;
+            }
+            
+            showLoading('validateResult', 'validateBtn', 'Validating document...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/validate`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ structured_record: record })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    const status = result.conforms ? 'PASSED' : 'FAILED';
+                    const type = result.conforms ? 'success' : 'error';
+                    showResult('validateResult', `Validation ${status}\n\n${JSON.stringify(result, null, 2)}`, type);
+                } else {
+                    showResult('validateResult', `Error: ${result.detail || JSON.stringify(result)}`, 'error');
+                }
+            } catch (error) {
+                showResult('validateResult', `Error: ${error.message}`, 'error');
+            } finally {
+                resetButton('validateBtn', 'Validate Document');
+            }
+        });
+        
+        // Search Knowledge Base
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const question = document.getElementById('question').value;
+            const discipline = document.getElementById('searchDiscipline').value;
+            const topK = parseInt(document.getElementById('topK').value);
+            
+            showLoading('searchResult', 'searchBtn', 'Searching knowledge base...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        question: question,
+                        discipline: discipline || undefined,
+                        top_k: topK
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    let display = `Answer:\n${result.answer}\n\n`;
+                    display += `Confidence: ${(result.confidence * 100).toFixed(1)}%\n\n`;
+                    
+                    if (result.citations && result.citations.length > 0) {
+                        display += 'Citations:\n';
+                        result.citations.forEach((citation, idx) => {
+                            display += `\n[${idx + 1}] ${citation.document_number} - ${citation.document_title}\n`;
+                            display += `    Page/Sheet: ${citation.page_or_sheet}\n`;
+                            display += `    Relevance: ${(citation.relevance_score * 100).toFixed(1)}%\n`;
+                            display += `    Snippet: ${citation.snippet}\n`;
+                        });
+                    }
+                    
+                    showResult('searchResult', display, 'success');
+                } else {
+                    showResult('searchResult', `Error: ${result.detail || JSON.stringify(result)}`, 'error');
+                }
+            } catch (error) {
+                showResult('searchResult', `Error: ${error.message}`, 'error');
+            } finally {
+                resetButton('searchBtn', 'Search');
+            }
+        });
+        
+        // Submit to DOCON
+        document.getElementById('submitForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const documentId = document.getElementById('documentId').value;
+            
+            showLoading('submitResult', 'submitBtn', 'Submitting to DOCON...');
+            
+            try {
+                const response = await fetch(`${API_BASE}/api/submit/${documentId}`, {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    const type = result.outcome === 'pass' ? 'success' : 'error';
+                    showResult('submitResult', JSON.stringify(result, null, 2), type);
+                } else {
+                    showResult('submitResult', `Error: ${result.detail || JSON.stringify(result)}`, 'error');
+                }
+            } catch (error) {
+                showResult('submitResult', `Error: ${error.message}`, 'error');
+            } finally {
+                resetButton('submitBtn', 'Submit to DOCON');
+            }
+        });
+    </script>
+</body>
+</html>
