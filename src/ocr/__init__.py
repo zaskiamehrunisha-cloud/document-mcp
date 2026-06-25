@@ -1,0 +1,1 @@
+"""OCR engine with PaddleOCR primary and Tesseract fallback."""

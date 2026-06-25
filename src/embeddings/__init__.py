@@ -1,0 +1,1 @@
+"""Embedding generation and parent-child chunking for retrieval."""

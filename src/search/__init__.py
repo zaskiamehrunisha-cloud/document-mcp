@@ -1,0 +1,1 @@
+"""Hybrid search and Q&A service combining pgvector and SQL full-text search."""

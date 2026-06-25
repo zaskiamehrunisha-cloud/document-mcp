@@ -1,0 +1,1 @@
+"""Document ingestion pipeline with format-specific extractors."""

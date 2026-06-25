@@ -1,0 +1,1 @@
+"""Document validation gateway with configurable rules."""
