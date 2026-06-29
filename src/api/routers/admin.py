@@ -3,7 +3,7 @@
 import logging
 from datetime import datetime, timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -34,10 +34,10 @@ async def get_system_metrics(
     try:
         # Document counts by status
         status_counts = {}
-        for status in ["Checking", "Approved", "Rejected"]:
-            query = select(func.count()).where(ReferenceDocument.status == status)
+        for doc_status in ["Checking", "Approved", "Rejected"]:
+            query = select(func.count()).where(ReferenceDocument.status == doc_status)
             result = await db.execute(query)
-            status_counts[status] = result.scalar() or 0
+            status_counts[doc_status] = result.scalar() or 0
 
         # Total documents
         total_query = select(func.count()).select_from(ReferenceDocument)
