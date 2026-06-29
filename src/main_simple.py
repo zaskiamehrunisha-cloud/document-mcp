@@ -1,9 +1,10 @@
 """Simple backend server for testing frontend connection."""
+import random
+from datetime import datetime
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from datetime import datetime
-import random
 
 app = FastAPI()
 
@@ -55,9 +56,9 @@ async def get_upload_status(job_id: str):
             "document_id": 1,
             "filename": "test.pdf"
         }
-    
+
     job = job_progress[job_id]
-    
+
     # Simulate progress
     if job["progress"] < 100:
         # Increment by 10% each poll for smooth progress
@@ -69,7 +70,7 @@ async def get_upload_status(job_id: str):
             job["status"] = "Processing"
         else:
             job["status"] = "Checking"
-    
+
     return JSONResponse({
         "job_id": job_id,
         "document_id": job["document_id"],

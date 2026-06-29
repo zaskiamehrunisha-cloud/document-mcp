@@ -1,13 +1,13 @@
 """Documents router for listing and retrieving document details."""
 import logging
-from fastapi import APIRouter, Depends, HTTPException, status, Query
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
-from typing import Optional
 
-from src.db.session import get_db
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.api.schemas import DocumentListResponse, DocumentResponse
 from src.db.models import ReferenceDocument
-from src.api.schemas import DocumentResponse, DocumentListResponse
+from src.db.session import get_db
 
 logger = logging.getLogger(__name__)
 
@@ -18,50 +18,50 @@ router = APIRouter(prefix="/documents", tags=["documents"])
 async def list_documents(
     page: int = Query(1, ge=1),
     page_size: int = Query(20, ge=1, le=100),
-    discipline: Optional[str] = None,
-    status: Optional[str] = None,
+    discipline: str | None = None,
+    status: str | None = None,
     db: AsyncSession = Depends(get_db),
 ):
     """
     List approved documents with pagination.
-    
+
     Args:
         page: Page number (1-indexed)
         page_size: Number of documents per page
         discipline: Optional discipline filter
         status: Optional status filter
         db: Database session
-        
+
     Returns:
         Paginated list of documents
     """
     try:
         # Build query
         query = select(ReferenceDocument)
-        
+
         # Apply filters
         if discipline:
             query = query.where(ReferenceDocument.discipline == discipline)
-        
+
         if status:
             query = query.where(ReferenceDocument.status == status)
         else:
             # Default to approved documents
             query = query.where(ReferenceDocument.status == "Approved")
-        
+
         # Get total count
         count_query = select(func.count()).select_from(query.subquery())
         total_result = await db.execute(count_query)
         total = total_result.scalar()
-        
+
         # Apply pagination
         offset = (page - 1) * page_size
         query = query.offset(offset).limit(page_size).order_by(ReferenceDocument.created_at.desc())
-        
+
         # Execute query
         result = await db.execute(query)
         documents = result.scalars().all()
-        
+
         # Transform to response format
         doc_responses = [
             DocumentResponse(
@@ -79,14 +79,14 @@ async def list_documents(
             )
             for doc in documents
         ]
-        
+
         return DocumentListResponse(
             documents=doc_responses,
             total=total,
             page=page,
             page_size=page_size,
         )
-    
+
     except Exception as e:
         logger.error(f"Failed to list documents: {e}", exc_info=True)
         raise HTTPException(
@@ -102,11 +102,11 @@ async def get_document(
 ):
     """
     Get details for a specific document.
-    
+
     Args:
         document_id: Document ID
         db: Database session
-        
+
     Returns:
         Document details
     """
@@ -115,13 +115,13 @@ async def get_document(
             select(ReferenceDocument).where(ReferenceDocument.id == document_id)
         )
         document = result.scalar_one_or_none()
-        
+
         if not document:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Document not found: {document_id}",
             )
-        
+
         return DocumentResponse(
             id=document.id,
             document_number=document.document_number,
@@ -135,7 +135,7 @@ async def get_document(
             created_at=document.created_at,
             updated_at=document.updated_at,
         )
-    
+
     except HTTPException:
         raise
     except Exception as e:

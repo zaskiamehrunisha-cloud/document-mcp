@@ -1,8 +1,8 @@
 """Domain-specific constants for the engineering document control system."""
-from enum import Enum
+from enum import StrEnum
 
 
-class Discipline(str, Enum):
+class Discipline(StrEnum):
     """Engineering disciplines supported by the system."""
     ELC = "ELC"  # Electrical
     MEC = "MEC"  # Mechanical
@@ -10,7 +10,7 @@ class Discipline(str, Enum):
     SIM = "SIM"  # Simulation
 
 
-class IssueStatus(str, Enum):
+class IssueStatus(StrEnum):
     """Document issue status codes per engineering document control standards."""
     IFR = "IFR"  # Issued for Review
     IFA = "IFA"  # Issued for Approval
@@ -19,33 +19,33 @@ class IssueStatus(str, Enum):
     IFI = "IFI"  # Issued for Information
 
 
-class DocumentStatus(str, Enum):
+class DocumentStatus(StrEnum):
     """Internal document processing status."""
     CHECKING = "Checking"
     APPROVED = "Approved"
     REJECTED = "Rejected"
 
 
-class ValidationRuleType(str, Enum):
+class ValidationRuleType(StrEnum):
     """Types of validation rules."""
     WARNING = "warning"
     BLOCKING = "blocking"
 
 
-class ChunkLevel(str, Enum):
+class ChunkLevel(StrEnum):
     """Chunk hierarchy levels for parent-child retrieval."""
     PARENT = "parent"
     CHILD = "child"
 
 
-class ConfidenceLevel(str, Enum):
+class ConfidenceLevel(StrEnum):
     """Q&A answer confidence levels."""
     HIGH = "High"
     MEDIUM = "Medium"
     LOW = "Low"
 
 
-class SubmissionStatus(str, Enum):
+class SubmissionStatus(StrEnum):
     """Document Controller submission status."""
     PASS = "pass"
     FAIL = "fail"

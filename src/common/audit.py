@@ -1,30 +1,27 @@
 """Audit trail utilities for logging system events."""
-from datetime import datetime, timezone
-from typing import Any, Optional
-import json
 import logging
-
-from src.config.settings import settings
+from datetime import UTC, datetime
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
 class AuditEvent:
     """Represents a single audit event."""
-    
+
     def __init__(
         self,
         event_type: str,
         entity_type: str,
-        entity_id: Optional[int] = None,
-        file_hash: Optional[str] = None,
-        model_version: Optional[str] = None,
-        confidence_score: Optional[float] = None,
-        metadata: Optional[dict[str, Any]] = None,
+        entity_id: int | None = None,
+        file_hash: str | None = None,
+        model_version: str | None = None,
+        confidence_score: float | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """
         Initialize an audit event.
-        
+
         Args:
             event_type: Type of event (e.g., 'ocr', 'parse', 'validate', 'qa')
             entity_type: Type of entity (e.g., 'document', 'chunk', 'review')
@@ -41,8 +38,8 @@ class AuditEvent:
         self.model_version = model_version
         self.confidence_score = confidence_score
         self.metadata = metadata or {}
-        self.timestamp = datetime.now(timezone.utc)
-    
+        self.timestamp = datetime.now(UTC)
+
     def to_dict(self) -> dict[str, Any]:
         """Convert audit event to dictionary for logging/storage."""
         return {
@@ -55,7 +52,7 @@ class AuditEvent:
             "confidence_score": self.confidence_score,
             "metadata": self.metadata,
         }
-    
+
     def log(self) -> None:
         """Log the audit event."""
         event_dict = self.to_dict()
@@ -76,7 +73,7 @@ def create_ocr_audit(
 ) -> AuditEvent:
     """
     Create an audit event for OCR processing.
-    
+
     Args:
         document_id: ID of the document being processed
         file_hash: SHA-256 hash of the file
@@ -85,7 +82,7 @@ def create_ocr_audit(
         page: Page number processed
         block_count: Total text blocks detected
         low_confidence_count: Blocks below confidence threshold
-        
+
     Returns:
         AuditEvent instance
     """
@@ -110,11 +107,11 @@ def create_parse_audit(
     model_version: str,
     parser_type: str,
     success: bool,
-    extracted_fields: Optional[list[str]] = None,
+    extracted_fields: list[str] | None = None,
 ) -> AuditEvent:
     """
     Create an audit event for document parsing.
-    
+
     Args:
         document_id: ID of the document being parsed
         file_hash: SHA-256 hash of the file
@@ -122,7 +119,7 @@ def create_parse_audit(
         parser_type: Type of parser (deterministic, llm, merge)
         success: Whether parsing succeeded
         extracted_fields: List of successfully extracted fields
-        
+
     Returns:
         AuditEvent instance
     """
@@ -147,11 +144,11 @@ def create_validation_audit(
     passed: bool,
     rules_evaluated: int,
     rules_failed: int,
-    rejection_note: Optional[dict[str, Any]] = None,
+    rejection_note: dict[str, Any] | None = None,
 ) -> AuditEvent:
     """
     Create an audit event for validation.
-    
+
     Args:
         document_id: ID of the document being validated
         file_hash: SHA-256 hash of the file
@@ -160,7 +157,7 @@ def create_validation_audit(
         rules_evaluated: Number of rules evaluated
         rules_failed: Number of rules that failed
         rejection_note: JSONB rejection note if validation failed
-        
+
     Returns:
         AuditEvent instance
     """
@@ -189,7 +186,7 @@ def create_qa_audit(
 ) -> AuditEvent:
     """
     Create an audit event for Q&A query.
-    
+
     Args:
         query_text: The user's query
         answer: Generated answer
@@ -197,7 +194,7 @@ def create_qa_audit(
         cited_document_ids: List of cited document IDs
         retrieved_chunk_ids: List of retrieved chunk IDs
         model_version: Version of the LLM model
-        
+
     Returns:
         AuditEvent instance
     """

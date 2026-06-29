@@ -5,8 +5,9 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.api.routers import admin, documents, review, search, upload, validation
+from src.api.routers.websocket import router as websocket_router
 from src.config.settings import settings
-from src.api.routers import upload, search, documents, review
 
 # Configure logging
 logging.basicConfig(
@@ -47,6 +48,9 @@ def create_app() -> FastAPI:
     app.include_router(search.router, prefix="/api")
     app.include_router(documents.router, prefix="/api")
     app.include_router(review.router, prefix="/api")
+    app.include_router(validation.router, prefix="/api")
+    app.include_router(admin.router, prefix="/api")
+    app.include_router(websocket_router)  # WebSocket at /ws/
 
     @app.get("/health")
     async def health_check():

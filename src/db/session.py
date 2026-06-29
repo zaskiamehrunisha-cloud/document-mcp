@@ -1,5 +1,6 @@
 """Async database session management with pgvector support."""
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
+
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -34,10 +35,10 @@ async_session_factory = async_sessionmaker(
 )
 
 
-async def get_db() -> AsyncGenerator[AsyncSession, None]:
+async def get_db() -> AsyncGenerator[AsyncSession]:
     """
     Dependency for FastAPI to get database sessions.
-    
+
     Yields:
         AsyncSession: Database session
     """
@@ -64,7 +65,7 @@ async def init_db() -> None:
     except ImportError:
         # pgvector < 0.3.0 or different API - vector type will be handled by SQLAlchemy
         pass
-    
+
     # Test connection
     async with engine.begin() as conn:
         await conn.run_sync(lambda _: None)

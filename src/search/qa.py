@@ -1,11 +1,10 @@
 """Q&A service with grounded answers and citations."""
 import logging
-from typing import Optional
 
-from src.search.hybrid import hybrid_search
-from src.llm.client import llm_client
 from src.common.audit import create_qa_audit
 from src.common.exceptions import DatabaseError
+from src.llm.client import llm_client
+from src.search.hybrid import hybrid_search
 
 logger = logging.getLogger(__name__)
 
@@ -15,25 +14,25 @@ class QAService:
     Q&A service that combines hybrid retrieval with LLM answer generation.
     Returns grounded answers with verifiable citations.
     """
-    
+
     def __init__(self):
         """Initialize Q&A service."""
         self.default_limit = 5  # Number of chunks to retrieve
-    
+
     async def ask(
         self,
         query: str,
-        discipline: Optional[str] = None,
-        document_ids: Optional[list[int]] = None,
+        discipline: str | None = None,
+        document_ids: list[int] | None = None,
     ) -> dict:
         """
         Answer a question using retrieved document context.
-        
+
         Args:
             query: User's question
             discipline: Optional discipline filter
             document_ids: Optional document ID filter
-            
+
         Returns:
             Dictionary with answer, citations, and confidence
         """
@@ -45,7 +44,7 @@ class QAService:
                 discipline=discipline,
                 document_ids=document_ids,
             )
-            
+
             if not context_chunks:
                 return {
                     "answer": "I cannot find this information in the provided documents.",
@@ -53,10 +52,10 @@ class QAService:
                     "citations": [],
                     "query": query,
                 }
-            
+
             # Step 2: Generate answer using LLM
             llm_result = await llm_client.generate_answer(query, context_chunks)
-            
+
             # Step 3: Prepare result
             result = {
                 "answer": llm_result["answer"],
@@ -65,11 +64,11 @@ class QAService:
                 "query": query,
                 "context_chunks_used": len(context_chunks),
             }
-            
+
             # Step 4: Create audit log
             cited_doc_ids = [c["document_number"] for c in llm_result["citations"]]
             retrieved_chunk_ids = [c["chunk"]["id"] for c in context_chunks if "chunk" in c]
-            
+
             audit = create_qa_audit(
                 query_text=query,
                 answer=llm_result["answer"],
@@ -79,34 +78,34 @@ class QAService:
                 model_version="llama3.1-8b",
             )
             audit.log()
-            
+
             logger.info(
                 f"Q&A complete for query '{query[:50]}...': "
                 f"{llm_result['confidence']} confidence, {len(llm_result['citations'])} citations"
             )
-            
+
             return result
-        
+
         except Exception as e:
             logger.error(f"Q&A failed: {e}", exc_info=True)
             raise DatabaseError(f"Q&A failed: {e}") from e
-    
+
     async def search(
         self,
         query: str,
         limit: int = 10,
-        discipline: Optional[str] = None,
-        document_ids: Optional[list[int]] = None,
+        discipline: str | None = None,
+        document_ids: list[int] | None = None,
     ) -> dict:
         """
         Perform search without LLM answer generation.
-        
+
         Args:
             query: Search query
             limit: Maximum results
             discipline: Optional discipline filter
             document_ids: Optional document ID filter
-            
+
         Returns:
             Dictionary with search results
         """
@@ -117,13 +116,13 @@ class QAService:
                 discipline=discipline,
                 document_ids=document_ids,
             )
-            
+
             return {
                 "query": query,
                 "results": results,
                 "total": len(results),
             }
-        
+
         except Exception as e:
             logger.error(f"Search failed: {e}", exc_info=True)
             raise DatabaseError(f"Search failed: {e}") from e

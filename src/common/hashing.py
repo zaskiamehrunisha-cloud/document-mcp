@@ -1,16 +1,15 @@
 """SHA-256 content hashing utilities for idempotent uploads and caching."""
 import hashlib
 from pathlib import Path
-from typing import Union
 
 
-def compute_file_hash(file_path: Union[str, Path]) -> str:
+def compute_file_hash(file_path: str | Path) -> str:
     """
     Compute SHA-256 hash of a file.
-    
+
     Args:
         file_path: Path to the file
-        
+
     Returns:
         Hexadecimal SHA-256 hash string
     """
@@ -25,10 +24,10 @@ def compute_file_hash(file_path: Union[str, Path]) -> str:
 def compute_content_hash(content: bytes) -> str:
     """
     Compute SHA-256 hash of byte content.
-    
+
     Args:
         content: Raw bytes to hash
-        
+
     Returns:
         Hexadecimal SHA-256 hash string
     """
@@ -38,10 +37,10 @@ def compute_content_hash(content: bytes) -> str:
 def compute_text_hash(text: str) -> str:
     """
     Compute SHA-256 hash of text content.
-    
+
     Args:
         text: String content to hash
-        
+
     Returns:
         Hexadecimal SHA-256 hash string
     """

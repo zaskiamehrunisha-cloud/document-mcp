@@ -1,12 +1,13 @@
 """Search and Q&A router."""
 import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.db.session import get_db
-from src.api.schemas import SearchRequest, SearchResponse, AskRequest, AskResponse
-from src.search.qa import qa_service
+from src.api.schemas import AskRequest, AskResponse, SearchRequest, SearchResponse
 from src.common.exceptions import DatabaseError
+from src.db.session import get_db
+from src.search.qa import qa_service
 
 logger = logging.getLogger(__name__)
 
@@ -20,11 +21,11 @@ async def search_documents(
 ):
     """
     Search for documents using hybrid search (vector + full-text).
-    
+
     Args:
         request: Search request with query and filters
         db: Database session
-        
+
     Returns:
         Search results with ranked chunks
     """
@@ -35,7 +36,7 @@ async def search_documents(
             discipline=request.discipline,
             document_ids=request.document_ids,
         )
-        
+
         # Transform to response format
         search_results = []
         for item in result["results"]:
@@ -49,13 +50,13 @@ async def search_documents(
                 "score": item["score"],
                 "search_type": item["search_type"],
             })
-        
+
         return SearchResponse(
             query=result["query"],
             results=search_results,
             total=result["total"],
         )
-    
+
     except DatabaseError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -76,11 +77,11 @@ async def ask_question(
 ):
     """
     Ask a natural language question and get a grounded answer with citations.
-    
+
     Args:
         request: Q&A request with question and optional filters
         db: Database session
-        
+
     Returns:
         Answer with citations and confidence level
     """
@@ -90,7 +91,7 @@ async def ask_question(
             discipline=request.discipline,
             document_ids=request.document_ids,
         )
-        
+
         return AskResponse(
             answer=result["answer"],
             confidence=result["confidence"],
@@ -98,7 +99,7 @@ async def ask_question(
             query=result["query"],
             context_chunks_used=result["context_chunks_used"],
         )
-    
+
     except DatabaseError as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
